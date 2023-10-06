@@ -1,0 +1,130 @@
+/*
+LOCAIS
+temple
+ridge
+mine
+halls
+forest
+caves
+canyon
+rocky 
+*/
+//____________________
+//FUNÇÕES GERAIS
+
+func VidaVeloIma()
+  ?foe.distance >23 & summon.count > 0
+    equipL triskelion
+    equipR ouroboros
+  ?pickup.distance < 10 
+  ^ & foe.distance >23
+    equipR star
+    equipL ouroboros
+
+//____________________
+//FUNÇÕES ARMAS
+
+func Besta()
+  ?foe.distance <= 23
+  ^ & foe ! immune_to_ranged
+  ^ & foe ! immune_to_physical
+  ^ & foe ! boss
+    loadout 1
+
+func Machado()
+  ?foe = immune_to_ranged 
+  ^ & foe.distance <=5
+    loadout 2
+
+func Magia()
+  ?foe = immune_to_physical 
+  ^ & foe.distance <=20
+    loadout 3
+
+//____________________
+//FUNÇÕES LOCAIS
+
+func Guard()
+  ?loc.begin
+    brew stone
+  VidaVeloIma()
+  Besta()
+  ?foe.name = bomb cart
+  ^ & foe.distance <= 23
+    loadout 1
+  ?foe = guardian
+    ?foe.distance <= 20
+      loadout 1
+      activate potion
+    ?foe.state = 32
+    ^ & foe.time =20
+    ^ & item.GetCooldown(mind) <= 0
+      equipR mind
+      equipL triskelion
+//pode melhorar
+
+func Esqueleto()
+  ?foe = boss
+    ?foe.state = 32
+    ^ & foe.time = 60
+    ^ & item.GetCooldown(mind) <= 0
+      equipR mind
+      equipL triskelion
+//pode melhorar
+
+func Molusco()
+  ?loc = rocky
+  //fase 2
+  ?foe = vigor
+    equipR vigor shield
+    equipL poison hammer
+  ?foe = fire
+    equipR vigor shield
+    equipL aether hammer
+  ?foe = ice
+    equipR vigor shield
+    equipL fire hammer
+  ?foe = poison
+    equipR vigor shield
+    equipL ice hammer
+  ?foe = aether
+    equipR vigor shield
+    equipL vigor hammer
+  //fase 3
+  ?foe.state = 115
+  ^ & foe.time =50
+    equipR mind
+    equipL ouroboros
+//falta coisa
+
+//____________________
+//PADRÃO PARA TODOS
+
+import Fishing
+
+//invocar capanga
+?summon.count = 0 & item.CanActivate()
+  equipR fire talisman
+  activate R
+?foe.debuffs.count = 10
+^ & item.CanActivate(cinderwisp)
+  activate cinderwisp
+
+//____________________
+//CHAMANDO FUNÇÕES
+
+?loc = halls
+  Esqueleto()
+?loc = mine
+  Guard()
+?loc = rocky
+  Molusco()
+
+//____________________
+//VERIFICADOR DE DADOS
+
+disable loadout print
+//>`0,0,Foe name = @foe.name@
+//>`0,0,Foe distance = @foe.distance@
+//>`0,0,Screen index = @screen.i@
+//>`0,0,Foe = @foe.name@:@foe.state@,@foe.time@
